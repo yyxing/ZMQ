@@ -18,16 +18,17 @@ public class BrokerApplication {
         globalPropertiesLoader = new GlobalPropertiesLoader();
         topicConfigLoader = new TopicConfigLoader();
         commitLogAppendHandler = new CommitLogAppendHandler();
-        commitLogAppendHandler.initTopicFile(CommonCache.getTopicModelMap().values());
+        commitLogAppendHandler.initTopicFile(CommonCache.getTopicConfigMap().values());
         topicConfigLoader.startRefreshConfigJob();
     }
 
     public static void main(String[] args) throws IOException, InterruptedException {
         initConfig();
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 100000; i++) {
             String hello = "hello" + i;
             CommitLogMessage commitLogMessage = new CommitLogMessage(hello.getBytes());
             commitLogAppendHandler.appendMessage("order_topic", commitLogMessage);
+            TimeUnit.MICROSECONDS.sleep(1);
             System.out.println("发送第" + i + "条");
         }
         System.out.println();

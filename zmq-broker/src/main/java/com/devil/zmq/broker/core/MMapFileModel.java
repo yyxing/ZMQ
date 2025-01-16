@@ -4,19 +4,17 @@ import com.devil.zmq.broker.cache.CommonCache;
 import com.devil.zmq.broker.constants.Constants;
 import com.devil.zmq.broker.lock.Lock;
 import com.devil.zmq.broker.lock.UnfairLock;
-import com.devil.zmq.broker.model.CommitLogModel;
-import com.devil.zmq.broker.model.TopicModel;
+import com.devil.zmq.broker.model.CommitLog;
+import com.devil.zmq.broker.model.ConsumeQueue;
+import com.devil.zmq.broker.model.TopicConfig;
 import com.devil.zmq.broker.utils.CommitLogUtil;
 import com.devil.zmq.common.UtilAll;
-import io.netty.util.internal.PlatformDependent;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MMapFileModel {
     private File file;
@@ -93,62 +91,73 @@ public class MMapFileModel {
         if (force) {
             mappedByteBuffer.force();
         }
+        dispatch(bytes.length);
         lock.unlock();
     }
 
-    private void updateCommitLogOffset(int offset) {
-        TopicModel topicModel = CommonCache.getTopicModelMap().get(topic);
-        if (null == topicModel) {
-            throw new IllegalArgumentException(String.format("topic is valid! topic is %s", topic));
+    private void dispatch(int size) {
+        TopicConfig topicConfig = validateTopic();
+        CommitLog commitLog = topicConfig.getLastCommitLog();
+        ConsumeQueue consumeQueue = new ConsumeQueue();
+        int oldOffset = commitLog.getOffset().get() - size;
+        consumeQueue.setCommitLogOffset(oldOffset);
+        consumeQueue.setSize(size);
+        consumeQueue.setCommitLogFileIndex(commitLog.getIndex().get());
+    }
+
+    private TopicConfig validateTopic() {
+        TopicConfig topicConfig = CommonCache.getTopicConfigMap().get(this.topic);
+        if (null == topicConfig) {
+            throw new IllegalArgumentException(String.format("topic is valid! topic is %s", this.topic));
         }
-        CommitLogModel commitLogModel = topicModel.getLastCommitLog();
-        commitLogModel.getOffset().addAndGet(offset);
-        topicModel.setLastCommitLog(commitLogModel);
-        CommonCache.getTopicModelMap().put(topic, topicModel);
+        return topicConfig;
+    }
+
+    private void updateCommitLogOffset(int offset) {
+        TopicConfig topicConfig = validateTopic();
+        CommitLog commitLog = topicConfig.getLastCommitLog();
+        commitLog.getOffset().get();
+        commitLog.getOffset().addAndGet(offset);
+        topicConfig.setLastCommitLog(commitLog);
+        CommonCache.getTopicConfigMap().put(this.topic, topicConfig);
     }
 
     private void CheckCommitLogFull(int writeSize) throws IOException {
-        TopicModel topicModel = CommonCache.getTopicModelMap().get(topic);
-        if (null == topicModel) {
-            throw new IllegalArgumentException(String.format("topic is valid! topic is %s", topic));
-        }
-        CommitLogModel commitLogModel = topicModel.getLastCommitLog();
-        int diff = commitLogModel.diff() - writeSize;
+        TopicConfig topicConfig = validateTopic();
+        CommitLog commitLog = topicConfig.getLastCommitLog();
+        int diff = commitLog.diff() - writeSize;
         if (diff < 0) {
-            createNewCommitLogFile(commitLogModel);
-            topicModel.setLastCommitLog(commitLogModel);
-            CommonCache.getTopicModelMap().put(topic, topicModel);
+            createNewCommitLogFile(commitLog);
+            topicConfig.setLastCommitLog(commitLog);
+            CommonCache.getTopicConfigMap().put(this.topic, topicConfig);
         }
     }
 
     public String getLatestCommitLogPath() throws IOException {
-        TopicModel topicModel = CommonCache.getTopicModelMap().get(topic);
-        if (null == topicModel) {
-            throw new IllegalArgumentException(String.format("topic is valid! topic is %s", topic));
-        }
-        CommitLogModel commitLogModel = topicModel.getLastCommitLog();
-        int diff = commitLogModel.diff();
+        TopicConfig topicConfig = validateTopic();
+        CommitLog commitLog = topicConfig.getLastCommitLog();
+        int diff = commitLog.diff();
         String latestCommitLogPath = "";
         if (diff > 0) {
-            latestCommitLogPath = CommitLogUtil.buildAbsolutePath(topic, commitLogModel.getIndex().get());
+            latestCommitLogPath = CommitLogUtil.buildAbsolutePath(this.topic, commitLog.getIndex().get());
         } else {
-            latestCommitLogPath = createNewCommitLogFile(commitLogModel);
-            topicModel.setLastCommitLog(commitLogModel);
-            CommonCache.getTopicModelMap().put(topic, topicModel);
+            latestCommitLogPath = createNewCommitLogFile(commitLog);
+            topicConfig.setLastCommitLog(commitLog);
+            CommonCache.getTopicConfigMap().put(this.topic, topicConfig);
         }
         return latestCommitLogPath;
     }
 
 
-    private String createNewCommitLogFile(CommitLogModel commitLogModel) throws IOException {
+    private String createNewCommitLogFile(CommitLog commitLog) throws IOException {
         // 更新commitLog
-        commitLogModel.handleSpaceFull();
+        commitLog.handleSpaceFull();
         // 生成最新的文件名称
-        String newCommitLogFilePath = CommitLogUtil.buildAbsolutePath(topic, commitLogModel.getIndex().get());
+        String newCommitLogFilePath = CommitLogUtil.buildAbsolutePath(topic, commitLog.getIndex().get());
         // 创建文件
         UtilAll.createFile(newCommitLogFilePath);
         // 映射最新的commitLog文件到内存中
-        buildMappedBuffer(newCommitLogFilePath, commitLogModel.getOffset().get(), Constants.defaultMMapSize);
+        buildMappedBuffer(newCommitLogFilePath, commitLog.getOffset().get(), Constants.defaultCommitLogSize);
         return newCommitLogFilePath;
     }
 

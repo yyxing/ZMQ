@@ -1,13 +1,11 @@
 package com.devil.zmq.broker.model;
 
 import java.io.Serializable;
-import java.util.List;
 
-public class TopicModel implements Serializable {
+public class TopicConfig implements Serializable {
 
     private String topic;
-    private CommitLogModel lastCommitLog;
-    private List<QueueModel> queueList;
+    private CommitLog lastCommitLog;
     private long createAt;
     private long updateAt;
     private int order;
@@ -28,14 +26,6 @@ public class TopicModel implements Serializable {
         this.topic = topic;
     }
 
-    public List<QueueModel> getQueueList() {
-        return queueList;
-    }
-
-    public void setQueueList(List<QueueModel> queueList) {
-        this.queueList = queueList;
-    }
-
     public long getCreateAt() {
         return createAt;
     }
@@ -52,11 +42,11 @@ public class TopicModel implements Serializable {
         this.updateAt = updateAt;
     }
 
-    public CommitLogModel getLastCommitLog() {
+    public CommitLog getLastCommitLog() {
         return lastCommitLog;
     }
 
-    public void setLastCommitLog(CommitLogModel lastCommitLog) {
+    public void setLastCommitLog(CommitLog lastCommitLog) {
         this.lastCommitLog = lastCommitLog;
     }
 
@@ -65,7 +55,6 @@ public class TopicModel implements Serializable {
         return "TopicModel{" +
                 "topic='" + topic + '\'' +
                 ", lastCommitLog=" + lastCommitLog +
-                ", queueList=" + queueList +
                 ", createAt=" + createAt +
                 ", updateAt=" + updateAt +
                 '}';

@@ -1,6 +1,7 @@
 package com.devil.zmq.common;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
 import io.netty.util.internal.PlatformDependent;
 
 import java.io.BufferedReader;
@@ -8,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class UtilAll {
 
@@ -49,7 +51,21 @@ public class UtilAll {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(JSON.parseArray(readFromFile("E:\\ZMQ\\ZMQ\\broker\\config\\zmq-topic.json")));
+    public static void writeToFile(String filename, String json) throws IOException {
+        String bakFile = filename + ".bak";
+        String prevContent = readFromFile(filename);
+        if (!prevContent.isEmpty()) {
+            string2FileNotSafe(prevContent, bakFile);
+        }
+        string2FileNotSafe(json, filename);
+    }
+
+    public static void string2FileNotSafe(final String str, final String fileName) throws IOException {
+        File file = new File(fileName);
+        File fileParent = file.getParentFile();
+        if (fileParent != null) {
+            fileParent.mkdirs();
+        }
+        FileUtil.writeString(str, file, Charset.defaultCharset());
     }
 }

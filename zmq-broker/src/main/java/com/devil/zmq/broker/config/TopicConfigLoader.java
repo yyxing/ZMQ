@@ -4,7 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.devil.zmq.broker.cache.CommonCache;
 import com.devil.zmq.broker.constants.Constants;
-import com.devil.zmq.broker.model.TopicModel;
+import com.devil.zmq.broker.model.TopicConfig;
 import com.devil.zmq.broker.utils.BrokerUtil;
 import com.devil.zmq.broker.utils.ThreadPoolUtil;
 import com.devil.zmq.common.UtilAll;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class TopicConfigLoader {
 
-    private TopicConfig topicConfig;
+    private com.devil.zmq.broker.config.TopicConfig topicConfig;
 
     public TopicConfigLoader() {
         this.loadConfig();
@@ -27,15 +27,15 @@ public class TopicConfigLoader {
     public void loadConfig() {
         String configPath = BrokerUtil.getConfigPath();
         String json = UtilAll.readFromFile(configPath);
-        List<TopicModel> topicConfigs = JSONObject.parseArray(json, TopicModel.class);
-        CommonCache.setTopicModelMap(topicConfigs.stream().collect(Collectors.toMap(TopicModel::getTopic, item -> item)));
+        List<TopicConfig> topicConfigConfigs = JSONObject.parseArray(json, TopicConfig.class);
+        CommonCache.setTopicConfigMap(topicConfigConfigs.stream().collect(Collectors.toMap(TopicConfig::getTopic, item -> item)));
     }
 
 
     public void startRefreshConfigJob() {
         ThreadPoolUtil.addScheduledTask(() -> {
-            List<TopicModel> values = new ArrayList<>(CommonCache.getTopicModelMap().values());
-            values.sort(Comparator.comparingInt(TopicModel::getOrder));
+            List<TopicConfig> values = new ArrayList<>(CommonCache.getTopicConfigMap().values());
+            values.sort(Comparator.comparingInt(TopicConfig::getOrder));
             FileUtil.writeString(JSONObject.toJSONString(values), BrokerUtil.getConfigPath(), Charset.defaultCharset());
         }, Constants.defaultFlushInterval, TimeUnit.SECONDS);
     }

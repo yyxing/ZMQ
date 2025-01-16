@@ -6,7 +6,7 @@ import com.devil.zmq.broker.utils.CommitLogUtil;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CommitLogModel implements Serializable {
+public class CommitLog implements Serializable {
     private String filename;
     private AtomicInteger offset;
     private AtomicInteger index;
@@ -50,7 +50,7 @@ public class CommitLogModel implements Serializable {
 
     public void handleSpaceFull() {
         this.setOffset(new AtomicInteger(0));
-        this.setOffsetLimit(Constants.defaultMMapSize);
+        this.setOffsetLimit(Constants.defaultCommitLogSize);
         this.getIndex().addAndGet(1);
         this.setFilename(CommitLogUtil.generateFileName(this.getIndex().get()));
     }

@@ -1,18 +1,17 @@
 package com.devil.zmq.broker.core;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.devil.zmq.broker.cache.CommonCache;
 import com.devil.zmq.broker.constants.LoggerName;
 import com.devil.zmq.broker.model.TopicConfig;
 import com.devil.zmq.broker.utils.BrokerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 public class TopicConfigManager extends ConfigManager {
 
@@ -26,18 +25,33 @@ public class TopicConfigManager extends ConfigManager {
 
     @Override
     public String encode(boolean prettyFormat) {
-        return JSONObject.toJSONString(this.topicConfigTable, prettyFormat);
+        List<TopicConfig> configs = getTopicConfigList();
+        return JSONObject.toJSONString(configs, prettyFormat);
     }
 
     @Override
     public void decode(String json) {
         List<TopicConfig> topicConfigConfigs = JSONObject.parseArray(json, TopicConfig.class);
-        CommonCache.setTopicConfigMap(topicConfigConfigs.stream().collect(Collectors.toMap(TopicConfig::getTopic, item -> item)));
-        this.topicConfigTable.putAll(CommonCache.getTopicConfigMap());
+        for (TopicConfig topicConfig : topicConfigConfigs) {
+            this.topicConfigTable.put(topicConfig.getTopic(), topicConfig);
+        }
     }
 
     @Override
     public String getConfigFilePath() {
         return BrokerUtil.getConfigPath();
     }
+
+    public TopicConfig selectTopicConfig(String topic) {
+        return this.topicConfigTable.get(topic);
+    }
+
+    public TopicConfig putTopicConfig(final TopicConfig topicConfig) {
+        return this.topicConfigTable.put(topicConfig.getTopic(), topicConfig);
+    }
+
+    public List<TopicConfig> getTopicConfigList() {
+        return CollectionUtil.sort(this.topicConfigTable.values(), Comparator.comparingInt(TopicConfig::getOrder));
+    }
+
 }

@@ -5,16 +5,16 @@ import java.util.Map;
 
 public class MMapFileModelManager {
 
-    private Map<String, MMapFileModel> mMapFileModelMap = new HashMap<>();
+    private Map<String, MappedFile> mMapFileModelMap = new HashMap<>();
 
-    public void put(String topic, MMapFileModel model) {
-        if (model == null) {
+    public void put(String topic, MappedFile mappedFile) {
+        if (mappedFile == null) {
             throw new IllegalArgumentException("topic file is not exist");
         }
-        mMapFileModelMap.put(topic, model);
+        mMapFileModelMap.put(topic, mappedFile);
     }
 
-    public MMapFileModel get(String topic) {
+    public MappedFile get(String topic) {
         return mMapFileModelMap.get(topic);
     }
 }

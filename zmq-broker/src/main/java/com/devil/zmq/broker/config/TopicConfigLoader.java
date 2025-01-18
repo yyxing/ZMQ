@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 
 public class TopicConfigLoader {
 
-    private com.devil.zmq.broker.config.TopicConfig topicConfig;
-
     public TopicConfigLoader() {
         this.loadConfig();
     }

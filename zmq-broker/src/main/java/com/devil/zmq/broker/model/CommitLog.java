@@ -6,7 +6,7 @@ import com.devil.zmq.broker.utils.CommitLogUtil;
 import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class CommitLog implements Serializable {
+public class  CommitLog implements Serializable {
     private String filename;
     private AtomicInteger offset;
     private AtomicInteger index;

@@ -22,7 +22,7 @@ public class CommitLogAppendHandler {
             String topicFilePath = Constants.getMqHome() + File.separator + Constants.BROKER_COMMIT_LOG_PATH +
                     topicConfig.getTopic() + File.separator + Constants.defaultTopicFile();
             UtilAll.createFile(topicFilePath);
-            MMapFileModel mapFileModel = new MMapFileModel(topicConfig.getTopic());
+            MappedFile mapFileModel = new MappedFile(topicConfig.getTopic());
 
             mapFileModel.loadFile(0, Constants.defaultCommitLogSize);
             mMapFileModelManager.put(topicConfig.getTopic(), mapFileModel);
@@ -30,7 +30,7 @@ public class CommitLogAppendHandler {
     }
 
     public void appendMessage(String topic, CommitLogMessage message) throws IOException {
-        MMapFileModel model = mMapFileModelManager.get(topic);
+        MappedFile model = mMapFileModelManager.get(topic);
         if (null == model) {
             throw new IllegalArgumentException("model is not exist");
         }
@@ -38,7 +38,7 @@ public class CommitLogAppendHandler {
     }
 
     public String read(String topic, int offset, int size) {
-        MMapFileModel model = mMapFileModelManager.get(topic);
+        MappedFile model = mMapFileModelManager.get(topic);
         if (null == model) {
             throw new IllegalArgumentException("topic is not exist");
         }

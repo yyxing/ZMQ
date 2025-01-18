@@ -2,26 +2,12 @@
   {
     "createAt": 1701918231281,
     "lastCommitLog": {
-      "filename": "00000003",
-      "index": 3,
-      "offset": 2492655,
+      "filename": "00000000",
+      "index": 0,
+      "offset": 375472,
       "offsetLimit": 4194304
     },
     "order": 1,
-    "queueList": [
-      {
-        "currentOffset": 133,
-        "id": 1,
-        "maxOffset": 155,
-        "minOffset": 111
-      },
-      {
-        "currentOffset": 133,
-        "id": 2,
-        "maxOffset": 155,
-        "minOffset": 111
-      }
-    ],
     "topic": "order_topic",
     "updateAt": 1701918231280
   },
@@ -34,20 +20,6 @@
       "offsetLimit": 20480
     },
     "order": 2,
-    "queueList": [
-      {
-        "currentOffset": 133,
-        "id": 1,
-        "maxOffset": 155,
-        "minOffset": 111
-      },
-      {
-        "currentOffset": 133,
-        "id": 2,
-        "maxOffset": 155,
-        "minOffset": 111
-      }
-    ],
     "topic": "user_topic",
     "updateAt": 1701918231280
   }

@@ -8,7 +8,6 @@ import java.util.Map;
 public class CommonCache {
 
     private static GlobalProperties globalProperties;
-    private static com.devil.zmq.broker.config.TopicConfig topicConfig;
     private static Map<String, TopicConfig> topicConfigMap;
 
     public static GlobalProperties getGlobalProperties() {
@@ -17,14 +16,6 @@ public class CommonCache {
 
     public static void setGlobalProperties(GlobalProperties globalProperties) {
         CommonCache.globalProperties = globalProperties;
-    }
-
-    public static com.devil.zmq.broker.config.TopicConfig getTopicConfig() {
-        return topicConfig;
-    }
-
-    public static void setTopicConfig(com.devil.zmq.broker.config.TopicConfig topicConfig) {
-        CommonCache.topicConfig = topicConfig;
     }
 
     public static Map<String, TopicConfig> getTopicConfigMap() {

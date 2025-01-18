@@ -16,7 +16,7 @@ import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 
-public class MMapFileModel {
+public class MappedFile {
     private File file;
     private MappedByteBuffer mappedByteBuffer;
     private FileChannel fileChannel;
@@ -24,7 +24,7 @@ public class MMapFileModel {
 
     private Lock lock;
 
-    public MMapFileModel(String topic) {
+    public MappedFile(String topic) {
         this.topic = topic;
         this.lock = new UnfairLock();
     }
